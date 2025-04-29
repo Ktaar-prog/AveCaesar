@@ -5,6 +5,7 @@ import com.ktaar.encryption.BruteForceAction;
 import com.ktaar.encryption.CaesarCipherAction;
 import com.ktaar.encryption.DecryptAction;
 import com.ktaar.encryption.EncryptAction;
+import com.ktaar.exceptions.InvalidArgsNumberException;
 import com.ktaar.exceptions.InvalidFileContentException;
 import com.ktaar.exceptions.WrongFilePathException;
 
@@ -27,28 +28,35 @@ public class ApplicationRunner {
             System.out.println("The application is running with a command line interface -=>");
         }
 
+        CommandsSet command = null;
+        String filePath = null;
+        int key = 0;
+
         if (args != null && args.length < MAX_ALLOWED_ARGS_COUNT) {
-            //throw exception
+            throw new InvalidArgsNumberException("Invalid number of arguments! Requires: Command, Path to file, Key.");
+        } else {
+            assert args != null;
+            command = isCommandValid(args[COMMANDS_ARG_POSITION]);
+
+            filePath = args[FILE_PATH_ARG_POSITION];
+            Path path = Path.of(filePath);
+            isFileExist(path);
+            String content = getFileContent(path);
+
+            key = isKeyValid(Integer.parseInt(args[KEY_ARG_POSITION]));
+            Map<CommandsSet, CaesarCipherAction> operations = Map.of(ENCRYPT, new EncryptAction(key),
+                    DECRYPT, new DecryptAction(key),
+                    BRUTE_FORCE, new BruteForceAction());
+
+            operations.get(command).execute(content);
         }
 
-        CommandsSet command = isCommandValid(args[COMMANDS_ARG_POSITION]);
 
-        String filePath = args[FILE_PATH_ARG_POSITION];
-        Path path = Path.of(filePath);
-        isFileExist(path);
-        String content = getFileContent(path);
-
-        int key = isKeyValid(Integer.parseInt(args[KEY_ARG_POSITION]));
-        Map<CommandsSet, CaesarCipherAction> operations = Map.of(ENCRYPT, new EncryptAction(key),
-                DECRYPT, new DecryptAction(key),
-                BRUTE_FORCE, new BruteForceAction());
-
-        operations.get(command).execute(content);
     }
 
     private void isFileExist(Path path) {
         if (Files.notExists(path)) {
-            throw new WrongFilePathException("Invalid path!");
+            throw new WrongFilePathException("Invalid file path!");
         }
     }
 
