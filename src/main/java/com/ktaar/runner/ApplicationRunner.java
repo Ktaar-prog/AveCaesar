@@ -43,15 +43,13 @@ public class ApplicationRunner {
             isFileExist(path);
             String content = getFileContent(path);
 
-            key = isKeyValid(Integer.parseInt(args[KEY_ARG_POSITION]));
+            key = isKeyValid(args[KEY_ARG_POSITION]);
             Map<CommandsSet, CaesarCipherAction> operations = Map.of(ENCRYPT, new EncryptAction(key),
                     DECRYPT, new DecryptAction(key),
                     BRUTE_FORCE, new BruteForceAction());
 
             operations.get(command).execute(content);
         }
-
-
     }
 
     private void isFileExist(Path path) {
